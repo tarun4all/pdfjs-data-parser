@@ -4,4 +4,6 @@ Its a sample code for those who want to fetch text from structured data from PDF
 
 code sample provided and the format would be :
 
+/test-converted.pdf
+
 
