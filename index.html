@@ -1,0 +1,119 @@
+
+<!doctype html>
+<html>
+<head>
+	<title>PDF converter</title>
+	<style>
+		.terms {
+			margin-top: 20%;
+			width: 100%;
+			font-size: 18px;
+			font-style: oblique;
+			color: #544343;
+		}
+	</style>
+</head>
+<body>
+	<script src="http://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+	<div>
+		<button onclick="getData()" style="    border-radius: 0.5em;
+											display: block;
+											width: 50%;
+											background-color: #6ec1c1;
+											height: 35px;">Process Data</button>
+
+		<button onclick="display()" disabled id="printOutput" style="border-radius: 0.5em;
+														display: block;
+														width: 50%;
+														background-color: #6ec1c1;
+														position: absolute;
+														top: 7px;
+														left: 50%;
+														height: 35px;"> Print Data</button>
+	</div>
+	<div id="consolePrint"></div>
+
+	<div class="terms">
+		<h3>Data for input:</h3>
+		<ul>
+			<li>
+				It focus on the data with a single partition file.
+			</li>
+			<li>
+				It considers the heading which have fonts more than 20px and paragraphs as less than or equal to 20px.
+			</li>
+			<li>
+				Parsed data is saved as Global in <span style="background: antiquewhite;">window.data</span>.
+			</li>
+		</ul>
+	</div>
+	<script>
+		function display() {
+			console.log(window.data);
+			document.getElementById('consolePrint').innerText = 'Please Open console to see output';
+		}
+		function getData() {
+			var url = 'test-converted.pdf';
+			var pdfjsLib = window['pdfjs-dist/build/pdf'];
+			pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+			pdfjsLib.getDocument(url).promise.then(function(pdf) {
+				var ctx = document.createElement('canvas').getContext('2d', { alpha: false });
+				var mainData = [];
+					var dataItem, paraStr = '';
+					window.data = mainData;
+				for (var i = 1; i <= pdf.numPages; i++) {
+					
+					pdf.getPage(i).then(function (page) {
+					var viewport = page.getViewport(1.5);
+
+					var pageContainer = document.createElement('div');
+					pageContainer.classList.add('page-container');
+					pageContainer.style.width = viewport.width + 'px';
+					pageContainer.style.height = viewport.height + 'px';
+					document.body.appendChild(pageContainer);
+
+					page.getTextContent({}).then(function (textContent) {
+						textContent.items.forEach(function (textItem, idx) {
+							//console.log(textItem, textItem.str);
+							var tx = pdfjsLib.Util.transform(
+								pdfjsLib.Util.transform(viewport.transform, textItem.transform),
+								[1, 0, 0, -1, 0, 0]
+							);
+							
+							var fontSize = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+							//console.log(fontSize);
+							
+							var item = document.createElement('span');
+							item.textContent = textItem.str;
+							item.style.fontSize = fontSize + 'px';
+
+							if(fontSize > 20) {
+								if(idx !== 0) {
+									mainData.push(dataItem);
+								}
+								dataItem = {heading: textItem.str, para: []};
+							} else {
+								if(textItem.str !== ' ') {
+									paraStr += textItem.str;
+								} else if(textItem.str === ' ' && paraStr) {
+									dataItem.para.push(paraStr);
+									paraStr = '';
+								}
+							}
+
+							if(idx === (textContent.items.length - 1)) {
+								mainData.push(dataItem);
+							}
+							pageContainer.appendChild(item);
+						});
+					});
+					});
+				}
+				});
+				document.getElementById('printOutput').disabled = false;
+		}
+			
+	</script>
+</body>
+</html>
