@@ -6,4 +6,6 @@ code sample provided and the format would be :
 
 /test-converted.pdf
 
+code live @ https://tarun4all.github.io/pdfjs-data-parser/.
+
 
