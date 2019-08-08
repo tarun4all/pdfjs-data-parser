@@ -57,7 +57,7 @@
 		function getData() {
 			var url = 'test-converted.pdf';
 			var pdfjsLib = window['pdfjs-dist/build/pdf'];
-			pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+			pdfjsLib.GlobalWorkerOptions.workerSrc = 'http://mozilla.github.io/pdf.js/build/pdf.worker.js';
 			pdfjsLib.getDocument(url).promise.then(function(pdf) {
 				var ctx = document.createElement('canvas').getContext('2d', { alpha: false });
 				var mainData = [];
